@@ -1,6 +1,6 @@
 {
   "name": "turbouuid",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Fast uuid generator / an alternative for crypto.randomUUID",
   "keywords": [
     "uuid"
