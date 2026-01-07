@@ -13,20 +13,21 @@ window.turboUUID = () => (
             .concat(u64[0].toString(16).substring(4)).padEnd(36, 0)
     );
 
-function benchmark() {
-    let t0, tLen, dt, max = 1e6;
+turboUUID.benchmark = (count = 1e6) => {
+    let t0, tLen, dt;
+    console.warn(`benchmark started to generation ${count} UUID strings.`);
 
-    tLen = max;
+    tLen = count;
     t0 = performance.now();
     while (tLen--) crypto.randomUUID();
     dt = performance.now() - t0;
-    console.log("crypto.randomUUID:", dt, crypto.randomUUID());
-    // crypto.randomUUID: 1138.6050000190735 d47cb6aa-e781-452a-ba2b-03663bd0b67c
+    console.log("crypto.randomUUID:\t", dt, "ms sample:", crypto.randomUUID());
+    //crypto.randomUUID: 1176.0499997138977 ms sample: 045989d4-e3b6-4ebc-99f4-4649c9c9ccea
 
-    tLen = max;
+    tLen = count;
     t0 = performance.now();
     while (tLen--) window.turboUUID();
     dt = performance.now() - t0;
-    console.log("window.turboUUID:", dt, window.turboUUID());
-    // window.turboUUID: 426.0099997520447 f1235820-f090-3fce-a0d6-af6e26c6a0d6
-}
+    console.log("window.turboUUID:\t", dt, "ms sample:", window.turboUUID());
+    //window.turboUUID: 404.78500032424927 ms sample: 853dcff4-2729-3fd6-fe00-36efc5920fe0
+};
