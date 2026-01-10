@@ -30,6 +30,47 @@
             console.log(`base.valueOf(\x1b[31m${uuid}\x1b[0m)`.padEnd(70).concat("-->"), valueOf);
             console.log(`base.randomUUID(\x1b[33m${value}\x1b[0m)`.padEnd(70).concat("-->"), randomUUID);
             console.groupEnd(`base calls:`);
+
+            {
+                const map = new Map();
+                self.array = new Array();
+                let count, uuid, value, t0, t1, t2, dtm, dtb;
+
+                count = 4e3;
+                while (count--) {
+                    uuid = turboUUID();
+                    value = Math.floor(Math.random() * 1e5);
+
+                    if (Math.random() > 0.998) {
+                        array.push(uuid);
+                    }
+
+                    map.set(uuid, value);
+                    base.setValue(uuid, value);
+                }
+
+                console.log("ready")
+                new BroadcastChannel("uuid").onmessage = e => {
+                    const uuid = e.data;
+
+                    t0 = performance.mark("map_start");
+                    map.get(uuid);
+                    dtm = performance.measure("map", "map_start");
+                    performance.clearMarks();
+                    performance.clearMeasures();
+                    performance.clearResourceTimings();
+
+                    t0 = performance.mark("base_start");
+                    base.valueOf(uuid);
+                    dtb = performance.measure("base", "base_start");
+                    performance.clearMarks();
+                    performance.clearMeasures();
+                    performance.clearResourceTimings();
+
+                    console.warn({ dtm, dtb })
+                }
+            }
+
         })
     </script>
 </head>

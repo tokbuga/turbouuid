@@ -182,18 +182,16 @@
             )
         )
 
-        (call $apply_regexp
-            (call $join_array<ext>ext
-                (array $of<ext.ext.ext.ext.ext>ext
-                    (call $to_string<i32.i32>ext (i32.load8_u  $i8a (i32x4.extract_lane 0 (local.get $offsets))) (i32.const 2))
-                    (call $to_string<i32.i32>ext (i32.load8_u  $i8b (i32x4.extract_lane 0 (local.get $offsets))) (i32.const 2))
-                    (call $to_string<i32.i32>ext (i32.load16_u $i16 (i32x4.extract_lane 1 (local.get $offsets))) (i32.const 4))
-                    (call $to_string<i32.i32>ext (i32.load     $i32 (i32x4.extract_lane 2 (local.get $offsets))) (i32.const 8))
-                    (call $to_string<i32.i64>ext (i64.load     $i64 (i32x4.extract_lane 3 (local.get $offsets))) (i32.const 16))
-                )
+        (call $join_array<ext>ext
+            (array $of<ext.ext.ext.ext.ext>ext
+                (call $to_string<i32.i32>ext (i32.load8_u  $i8a (i32x4.extract_lane 0 (local.get $offsets))) (i32.const 2))
+                (call $to_string<i32.i32>ext (i32.load8_u  $i8b (i32x4.extract_lane 0 (local.get $offsets))) (i32.const 2))
+                (call $to_string<i32.i32>ext (i32.load16_u $i16 (i32x4.extract_lane 1 (local.get $offsets))) (i32.const 4))
+                (call $to_string<i32.i32>ext (i32.load     $i32 (i32x4.extract_lane 2 (local.get $offsets))) (i32.const 8))
+                (call $to_string<i32.i64>ext (i64.load     $i64 (i32x4.extract_lane 3 (local.get $offsets))) (i32.const 16))
             )
-            (global.get $ARGUMENTS_REGEXP_TO_STRING)
         )
+        
     )
 
     (func $get_vector_index
@@ -304,17 +302,17 @@
         )
     )
 
-    (func $main
-        (i32.store (global.get $OFFSET_UUID_COUNT) (i32.const 0))
-        (i32.store (global.get $OFFSET_BLOCK_COUNT) (i32.const 1))
-
+    (main $set_initials
         (global.set $ARGUMENTS_REGEXP_CLEAR_STR (call $regexp_args (text "[^a-f0-9]") (string)))
         (global.set $ARGUMENTS_REGEXP_MATCH_I8A (call $regexp_args (text "(?:[a-f0-9]{0})([a-f0-9]{2})(?:[a-f0-9]{30})") (text "0x$1")))
         (global.set $ARGUMENTS_REGEXP_MATCH_I8B (call $regexp_args (text "(?:[a-f0-9]{2})([a-f0-9]{2})(?:[a-f0-9]{28})") (text "0x$1")))
         (global.set $ARGUMENTS_REGEXP_MATCH_I16 (call $regexp_args (text "(?:[a-f0-9]{4})([a-f0-9]{4})(?:[a-f0-9]{24})") (text "0x$1")))
         (global.set $ARGUMENTS_REGEXP_MATCH_I32 (call $regexp_args (text "(?:[a-f0-9]{8})([a-f0-9]{8})(?:[a-f0-9]{16})") (text "0x$1")))
         (global.set $ARGUMENTS_REGEXP_MATCH_I64 (call $regexp_args (text "(?:[a-f0-9]{16})([a-f0-9]{16})([a-f0-9]{0}?)") (text "0x$1")))
-        (global.set $ARGUMENTS_REGEXP_TO_STRING (call $regexp_args (text "^([a-f0-9]{8})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{12})$") (text "$1-$2-$3-$4-$5")))
+        (global.set $ARGUMENTS_REGEXP_TO_STRING (call $regexp_args (text "(.{8})(.{4})(.{4})(.{4})(.*)") (text "$1-$2-$3-$4-$5")))
+
+        (i32.store (global.get $OFFSET_UUID_COUNT) (i32.const 0))
+        (i32.store (global.get $OFFSET_BLOCK_COUNT) (i32.const 1))
     )
 
     (func $regexp_args
@@ -447,55 +445,55 @@
                 
                     (br_if $blocks (i8x16.all_true (i8x16.ne (local.get $i8b.splat) (v128.load $i8b offset=0 (local.get $offset.i8x16)))))
 
-                    (if (v128.any_true (v128.xor (local.get $i16.splat) (v128.load $i16 offset=0 (local.get $offset.i16x8))))(then
-                    (if (v128.any_true (v128.xor (local.get $i32.splat) (v128.load $i32 offset=0 (local.get $offset.i32x4))))(then
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=0 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i16x8.eq (local.get $i16.splat) (v128.load $i16 offset=0 (local.get $offset.i16x8))))(then
+                    (if (v128.any_true (i32x4.eq (local.get $i32.splat) (v128.load $i32 offset=0 (local.get $offset.i32x4))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=0 (local.get $offset.i64x2))))(then
                         (if (i32.eq (i32.load8_u $i8a offset=0 (local.get $offset.i8x16)) (local.get $i8a.value))(then 
                             (return (i32.add (local.get $offset.i8x16) (i32.const 0)))))
                         (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=1 (local.get $offset.i8x16)))(then 
                             (return (i32.add (local.get $offset.i8x16) (i32.const 1)))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=16 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=16 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=2 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 2)))))
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=3 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 3)))))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i32.splat) (v128.load $i32 offset=16 (local.get $offset.i32x4))))(then
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=32 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i32x4.eq (local.get $i32.splat) (v128.load $i32 offset=16 (local.get $offset.i32x4))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=32 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=4 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 4)))))
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=5 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 5)))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=48 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=48 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=6 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 6)))))
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=7 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 7)))))))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i16.splat) (v128.load $i16 offset=16 (local.get $offset.i16x8))))(then
-                    (if (v128.any_true (v128.xor (local.get $i32.splat) (v128.load $i32 offset=32 (local.get $offset.i32x4))))(then
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=64 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i16x8.eq (local.get $i16.splat) (v128.load $i16 offset=16 (local.get $offset.i16x8))))(then
+                    (if (v128.any_true (i32x4.eq (local.get $i32.splat) (v128.load $i32 offset=32 (local.get $offset.i32x4))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=64 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=8 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 8)))))
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=9 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 9)))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=80 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=80 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=10 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 10)))))
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=11 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 11)))))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i32.splat) (v128.load $i32 offset=48 (local.get $offset.i32x4))))(then
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=96 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i32x4.eq (local.get $i32.splat) (v128.load $i32 offset=48 (local.get $offset.i32x4))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=96 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=12 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 12)))))
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=13 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 13)))))))
 
-                    (if (v128.any_true (v128.xor (local.get $i64.splat) (v128.load $i64 offset=112 (local.get $offset.i64x2))))(then
+                    (if (v128.any_true (i64x2.eq (local.get $i64.splat) (v128.load $i64 offset=112 (local.get $offset.i64x2))))(then
                             (if (i32.eq (local.get $i8a.value) (i32.load8_u $i8a offset=14 (local.get $offset.i8x16)))(then 
                                 (return (i32.add (local.get $offset.i8x16) (i32.const 14)))))
 
@@ -509,6 +507,4 @@
 
         (i32.const -1)
     )
-
-    (start $main)
 )

@@ -1,6 +1,6 @@
 {
   "name": "turbouuid",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Fast uuid generator / an alternative for crypto.randomUUID",
   "keywords": [
     "uuid"
@@ -19,5 +19,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "wat4wasm": "^1.1.4"
   }
 }
